@@ -40,7 +40,8 @@ INSTALLED_APPS = [
 TAILWIND_APP_NAME = 'eatwellapp'
 # Static files settings
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'eatwellapp/static']
+# STATICFILES_DIRS = [BASE_DIR / 'eatwellapp/static']
+
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files settings
