@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static%}
+
+{% block title %}Order Confirmation{% endblock %}
+
+{% block content %}
+<div class="h-screen" style="background-image: url('{% static 'images/dashboard_bg.png' %}'); background-size: cover; background-repeat: no-repeat;">
+    <!-- Top Bar -->
+    <div class=" flex flex-col justify-between items-center py-8 px-4 font-sans" >
+        <div class="flex items-center space-x-2 text-gray-500 mb-4 mt-8">
+            <a href="{% url 'food_categories' %}" class="hover:text-gray-700">Food & Drinks</a>
+            <span>/</span>
+            <span class="text-gray-700">{{ category_name|default:"All Categories" }}</span>
+        </div>
+        <div class="flex items-center space-x-4 w-full">
+            
+            <!-- Search Bar -->
+            <div class="relative w-full">
+                <input type="text" 
+                    placeholder="Search..." 
+                    class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:border-yellow-500">
+                <svg class="w-5 h-5 text-gray-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </div>
+            <!-- Cart Icon -->
+            <a href="{% url 'cart' %}" class="relative">
+                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                {% if cart_count %}
+                <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {{ cart_count }}
+                </span>
+                {% endif %}
+            </a>
+        </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-6 m-6 mt-8">
+        <h2 class="text-2xl font-bold mb-6">Order Confirmation</h2>
+        <p class="text-lg mb-4">Thank you for your order!</p>
+        <p class="mb-2"><strong>Order ID:</strong> {{ order.id }}</p>
+        <p class="mb-2"><strong>Restaurant:</strong> {{ order.restaurant.name }}</p>
+        <p class="mb-2"><strong>Total Amount:</strong> ₦{{ order.total_amount }}</p>
+        <p class="mb-2"><strong>Payment Method:</strong> {{ order.get_payment_method_display }}</p>
+        <h3 class="text-xl font-semibold mt-6 mb-4">Order Items:</h3>
+        <ul class="list-disc pl-6">
+            {% for item in order.items.all %}
+                <li>{{ item.food.name }} (x{{ item.quantity }}) - ₦{{ item.price }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
+

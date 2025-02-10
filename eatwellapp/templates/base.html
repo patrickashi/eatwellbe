@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EatWell{% endblock %}</title>
+    {% load static %}
+    <link href="{% static 'css/output.css' %}" rel="stylesheet">
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col font-sans">
+    <header class="header bg-[#8A3E73] text-white w-full fixed z-10">
+        <nav class="container mx-auto px-4 py-2 flex justify-between items-center">
+
+            <a href="{% url 'home' %}" class="text-2xl font-bold">
+                <img src="{% static 'images/eatwell.png' %}" alt="EatWell Logo" class=" w-32">
+            </a>
+            <ul class="flex space-x-4 mr-4 md:mr-0">
+                {% if user.is_authenticated %}
+                    {% if user.user_type == 'customer' %}
+                        <li><a href="{% url 'customer_dashboard' %}" class="hover:text-blue-200">Dashboard</a></li>
+                    {% elif user.user_type == 'store_owner' %}
+                        <li><a href="{% url 'store_owner_dashboard' %}" class="hover:text-blue-200">Dashboard</a></li>
+                    {% endif %}
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <li><button type="submit" class="hover:text-blue-200 bg-transparent border-none cursor-pointer">Logout</button></li>
+                    </form>
+                    
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="hover:text-blue-200 mr-4">Login</a></li>
+                    <!-- <li><a href="{% url 'customer_register' %}" class="hover:text-blue-200">Customer Register</a></li>
+                    <li><a href="{% url 'store_owner_register' %}" class="hover:text-blue-200">Store Owner Register</a></li> -->
+                {% endif %}
+                <button id="theme-toggle" class=" rounded-md mr-4 bg-gray-200 dark:bg-gray-800">
+                    <span id="theme-icon" class="text-lg">🌞</span> <!-- Sun for light theme -->
+                  </button>
+            </ul>
+            
+            <!-- Mobile menu button -->
+            <button 
+                type="button"
+                class="lg:hidden fixed right-0 z-20 rounded-md p-2 text-white bg-[#8A3E73] hover:bg-gray-100 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-red-500"
+                onclick="document.getElementById('sidebar').classList.toggle('-translate-x-full')"
+            >
+                <span class="sr-only">Open sidebar</span>
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </nav>
+    </header>
+
+    <main class=" ">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <script>
+        const toggleButton = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+      
+        // Check localStorage for saved theme preference
+        if (localStorage.getItem('theme') === 'dark') {
+          document.body.classList.add('dark');
+          themeIcon.textContent = '🌙'; // Moon icon for dark theme
+        } else {
+          document.body.classList.remove('dark');
+          themeIcon.textContent = '🌞'; // Sun icon for light theme
+        }
+      
+        // Toggle theme on button click
+        toggleButton.addEventListener('click', () => {
+          document.body.classList.toggle('dark');
+          
+          // Save theme preference to localStorage
+          if (document.body.classList.contains('dark')) {
+            themeIcon.textContent = '🌙'; // Moon icon
+            localStorage.setItem('theme', 'dark');
+          } else {
+            themeIcon.textContent = '🌞'; // Sun icon
+            localStorage.setItem('theme', 'light');
+          }
+        });
+      </script>
+      
+</body>
+</html>
+
