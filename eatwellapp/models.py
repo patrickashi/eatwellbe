@@ -88,6 +88,7 @@ class Order(models.Model):
     is_paid = models.BooleanField(default=False)
     payment_method = models.CharField(max_length=20, choices=(('online', 'Online'), ('on_delivery', 'On Delivery')))
     address = models.TextField(null=True, blank=True)  # Make address nullable
+    delivery_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def __str__(self):
         return f"Order {self.id} - {self.customer.user.username} - {self.address}"

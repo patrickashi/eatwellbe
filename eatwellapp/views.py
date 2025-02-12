@@ -5,6 +5,7 @@ from .forms import CustomerRegistrationForm, StoreOwnerRegistrationForm, CustomU
 from .models import Restaurant, Food, Order, OrderItem
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from decimal import Decimal
 
 def home(request):
     return render(request, 'eatwellapp/home.html')
@@ -152,73 +153,170 @@ def add_to_cart(request, food_id):
 def cart(request):
     cart = request.session.get('cart', {})
     items = []
-    total = 0
+    total = Decimal('0.00')
+    restaurants = set()
+
     for food_id, details in cart.items():
-        food = Food.objects.get(id=food_id)
-        # Extract the quantity value if `details` is a dictionary
+        food = get_object_or_404(Food, id=food_id)
         quantity = details if isinstance(details, int) else details.get('quantity', 1)
         subtotal = food.price * quantity
         total += subtotal
-        items.append({'food': food, 'quantity': quantity, 'subtotal': subtotal})
-    return render(request, 'eatwellapp/cart.html', {'items': items, 'total': total})
+        restaurants.add(food.restaurant)
+        items.append({
+            'food': food,
+            'quantity': quantity,
+            'subtotal': subtotal
+        })
+
+    # Calculate delivery fee
+    delivery_fee = Decimal('0.00')
+    for restaurant in restaurants:
+        if restaurant.location.lower() == 'ogoja':
+            delivery_fee += Decimal('1000.00')
+        elif restaurant.location.lower() == 'okuku':
+            delivery_fee += Decimal('2000.00')
+        # Add more locations as needed
+
+    total_with_delivery = total + delivery_fee
+
+    context = {
+        'items': items,
+        'total': total,
+        'delivery_fee': delivery_fee,
+        'total_with_delivery': total_with_delivery,
+        'restaurant_count': len(restaurants),
+        'cart_count': sum(item['quantity'] for item in items)
+    }
+
+    return render(request, 'eatwellapp/cart.html', context)
+
 
 @login_required
 def checkout(request):
     if request.method == 'POST':
         cart = request.session.get('cart', {})
         
-        # Redirect to the cart page if it's empty
         if not cart:
             return redirect('cart')
         
-        # Retrieve the restaurant ID
-        restaurant_id = next(iter(cart.keys()), None) 
-        if not restaurant_id:
-            return redirect('cart')  # Safety check in case of invalid cart structure
-        
-        # Fetch the restaurant object
-        restaurant = get_object_or_404(Restaurant, id=restaurant_id)
-        
-        # Calculate total amount safely
-        total_amount = 0
-        for food_id, details in cart.items():
-            food = get_object_or_404(Food, id=food_id)
-            # Handle case where details might be a dictionary or an integer
-            quantity = details if isinstance(details, int) else details.get('quantity', 1)
-            total_amount += food.price * quantity
-        
-        # Create the order
-        order = Order.objects.create(
-            customer=request.user.customer,
-            restaurant=restaurant,
-            total_amount=total_amount,
-            payment_method=request.POST.get('payment_method', 'unknown')  # Default to 'unknown' if not provided
-        )
-        
-        # Create order items
+        total_amount = Decimal('0.00')
+        order_items = []
+        restaurants = set()
+
         for food_id, details in cart.items():
             food = get_object_or_404(Food, id=food_id)
             quantity = details if isinstance(details, int) else details.get('quantity', 1)
-            OrderItem.objects.create(
-                order=order,
-                food=food,
-                quantity=quantity,
-                price=food.price
+            item_total = food.price * quantity
+            total_amount += item_total
+            
+            restaurants.add(food.restaurant)
+            
+            order_items.append({
+                'food': food,
+                'quantity': quantity,
+                'price': food.price,
+                'restaurant': food.restaurant
+            })
+
+        # Calculate delivery fees
+        delivery_fee = Decimal('0.00')
+        for restaurant in restaurants:
+            if restaurant.location.lower() == 'ogoja':
+                delivery_fee += Decimal('1000.00')
+            elif restaurant.location.lower() == 'okuku':
+                delivery_fee += Decimal('2000.00')
+            # Add more locations as needed
+
+        total_amount += delivery_fee
+
+        # Create separate orders for each restaurant
+        orders = []
+        for restaurant in restaurants:
+            restaurant_items = [item for item in order_items if item['restaurant'] == restaurant]
+            restaurant_total = sum(item['price'] * item['quantity'] for item in restaurant_items)
+            
+            order = Order.objects.create(
+                customer=request.user.customer,
+                restaurant=restaurant,
+                total_amount=restaurant_total,
+                delivery_fee=delivery_fee / len(restaurants),  # Split delivery fee equally among restaurants
+                payment_method=request.POST.get('payment_method', 'unknown')
             )
-        
+            
+            for item in restaurant_items:
+                OrderItem.objects.create(
+                    order=order,
+                    food=item['food'],
+                    quantity=item['quantity'],
+                    price=item['price']
+                )
+            
+            orders.append(order)
+
+        # Store order IDs in session for order confirmation page
+        request.session['recent_order_ids'] = [order.id for order in orders]
+
         # Clear the cart after successful checkout
         request.session['cart'] = {}
         
         # Redirect to order confirmation page
-        return redirect('order_confirmation', order_id=order.id)
+        return redirect('order_confirmation')
     
     # Render the checkout page for GET requests
-    return render(request, 'eatwellapp/checkout.html')
+    return render(request, 'eatwellapp/checkout.html', {'cart': request.session.get('cart', {})})
+
 
 @login_required
-def order_confirmation(request, order_id):
-    order = Order.objects.get(id=order_id)
-    return render(request, 'eatwellapp/order_confirmation.html', {'order': order})
+def order_now(request, food_id):
+    food = get_object_or_404(Food, id=food_id)
+    
+    # Create order with single item
+    order = Order.objects.create(
+        customer=request.user.customer,
+        restaurant=food.restaurant,
+        total_amount=food.price,
+        payment_method='online'  # Default to online payment
+    )
+    
+    # Create order item
+    OrderItem.objects.create(
+        order=order,
+        food=food,
+        quantity=1,
+        price=food.price
+    )
+    
+    # Store the order ID in the session
+    request.session['recent_order_ids'] = [order.id]
+    
+    return redirect('order_confirmation')
+
+@login_required
+def order_confirmation(request):
+    # Fetch the most recent orders for the current user
+    recent_order_ids = request.session.get('recent_order_ids', [])
+    
+    if recent_order_ids:
+        recent_orders = Order.objects.filter(id__in=recent_order_ids).order_by('-created_at')
+    else:
+        # If no recent order IDs in session, get the latest order
+        recent_orders = Order.objects.filter(customer=request.user.customer).order_by('-created_at')[:1]
+    
+    total_amount = sum(order.total_amount for order in recent_orders)
+    total_delivery_fee = sum(order.delivery_fee for order in recent_orders)
+
+    context = {
+        'orders': recent_orders,
+        'total_amount': total_amount,
+        'total_delivery_fee': total_delivery_fee,
+        'grand_total': total_amount + total_delivery_fee
+    }
+
+    # Clear the recent order IDs from the session
+    if 'recent_order_ids' in request.session:
+        del request.session['recent_order_ids']
+
+    return render(request, 'eatwellapp/order_confirmation.html', context)
 
 @login_required
 def food_categories(request):
@@ -252,7 +350,6 @@ def order_history(request):
     orders = Order.objects.filter(customer=request.user.customer).order_by('-created_at')
     return render(request, 'eatwellapp/order_history.html', {'orders': orders})
 
-@login_required
 def order_now(request, food_id):
     food = get_object_or_404(Food, id=food_id)
     
@@ -272,7 +369,10 @@ def order_now(request, food_id):
         price=food.price
     )
     
-    return redirect('order_confirmation', order_id=order.id)
+    # Store the order ID in the session
+    request.session['recent_order_ids'] = [order.id]
+    
+    return redirect('order_confirmation')
 
 @login_required
 def remove_from_cart(request, food_id):

@@ -66,8 +66,18 @@
                     Total Items: {{ cart_count }}
                 </div>
                 <div>
-                    <p class="text-gray-600">Total:</p>
-                    <p class="text-2xl font-bold">₦{{ total }}</p>
+                    <p class="text-gray-600">Subtotal:</p>
+                    <p class="text-xl font-bold">₦{{ total }}</p>
+                </div>
+            </div>
+            <div class="mt-4 flex justify-between items-center">
+                <div>
+                    <p class="text-gray-600">Delivery Fee ({{ restaurant_count }} restaurant{% if restaurant_count > 1 %}s{% endif %}):</p>
+                    <p class="text-lg font-semibold">₦{{ delivery_fee }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-600">Total (including delivery):</p>
+                    <p class="text-2xl font-bold text-red-500">₦{{ total_with_delivery }}</p>
                 </div>
             </div>
             <div class="mt-8 flex justify-end space-x-4">
@@ -92,4 +102,3 @@
     {% endif %}
 </div>
 {% endblock %}
-
