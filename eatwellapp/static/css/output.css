@@ -1040,21 +1040,12 @@ video {
   height: 1.5rem;
 }
 
-.h-full {
-  height: 100%;
+.h-auto {
+  height: auto;
 }
 
 .h-screen {
   height: 100vh;
-}
-
-.h-fit {
-  height: -moz-fit-content;
-  height: fit-content;
-}
-
-.h-auto {
-  height: auto;
 }
 
 .max-h-none {
@@ -1079,10 +1070,6 @@ video {
 
 .w-32 {
   width: 8rem;
-}
-
-.w-40 {
-  width: 10rem;
 }
 
 .w-5 {
@@ -1115,6 +1102,14 @@ video {
 
 .w-screen {
   width: 100vw;
+}
+
+.w-20 {
+  width: 5rem;
+}
+
+.w-1 {
+  width: 0.25rem;
 }
 
 .max-w-md {
@@ -2744,11 +2739,6 @@ video {
   line-height: 2.25rem;
 }
 
-.text-4xl {
-  font-size: 2.25rem;
-  line-height: 2.5rem;
-}
-
 .text-lg {
   font-size: 1.125rem;
   line-height: 1.75rem;
@@ -3472,95 +3462,37 @@ button.addtocart:hover::after {
   opacity: 1;
 }
 
-/* From Uiverse.io by gharsh11032000 */
+/* From Uiverse.io by mrtqzbek11 */
 
-.animated-button {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 16px 36px;
-  border: 4px solid;
-  border-color: transparent;
-  font-size: 12px;
-  background-color: inherit;
-  border-radius: 20px;
-  color: white;
-  font-weight: 700;
-  font-family: Arial, Helvetica, sans-serif;
-  box-shadow: 0 0 0 2px #8A3E73;
+.hold_button {
+  width: 165px;
+  height: 62px;
   cursor: pointer;
-  overflow: hidden;
-  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.animated-button svg {
-  position: absolute;
-  width: 24px;
-  fill: white;
-  z-index: 9;
-  transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.animated-button .arr-1 {
-  right: 16px;
-}
-
-.animated-button .arr-2 {
-  left: -25%;
-}
-
-.animated-button .circle {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 20px;
-  height: 20px;
-  background-color: #8A3E73;
-  border-radius: 50%;
-  opacity: 0;
-  transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.animated-button .text {
+  color: #fff;
+  font-size: 12px;
+  border-radius: 1rem;
+  border: none;
   position: relative;
-  z-index: 1;
-  transform: translateX(-12px);
-  transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: 0.1s;
+  background: radial-gradient( circle farthest-corner at 10% 20%,  rgba(255,94,247,1) 17.8%, rgba(2,245,255,1) 100.2% );
 }
 
-.animated-button:hover {
-  box-shadow: 0 0 0 12px transparent;
-  color: white;
-  border-radius: 12px;
+.hold_button::after {
+  content: '';
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(255,94,247,1) 17.8%, rgba(2,245,255,1) 100.2% );
+  filter: blur(15px);
+  z-index: -1;
+  position: absolute;
+  left: 0;
+  top: 0;
 }
 
-.animated-button:hover .arr-1 {
-  right: -25%;
-}
-
-.animated-button:hover .arr-2 {
-  left: 16px;
-}
-
-.animated-button:hover .text {
-  transform: translateX(12px);
-}
-
-.animated-button:hover svg {
-  fill: white;
-}
-
-.animated-button:active {
-  scale: 0.95;
-  box-shadow: 0 0 0 4px #8A3E73;
-}
-
-.animated-button:hover .circle {
-  width: 220px;
-  height: 220px;
-  opacity: 1;
+.hold_button:active {
+  transform: scale(0.9) rotate(3deg);
+  background: radial-gradient( circle farthest-corner at 10% 20%,  rgba(255,94,247,1) 17.8%, rgba(2,245,255,1) 100.2% );
+  transition: 0.5s;
 }
 
 /* Light Theme Styles */
@@ -3811,6 +3743,10 @@ body.dark {
     margin-right: 0px;
   }
 
+  .md\:w-40 {
+    width: 10rem;
+  }
+
   .md\:w-full {
     width: 100%;
   }
@@ -3821,6 +3757,16 @@ body.dark {
 
   .md\:flex-row {
     flex-direction: row;
+  }
+
+  .md\:text-4xl {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+
+  .md\:text-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
   }
 }
 
