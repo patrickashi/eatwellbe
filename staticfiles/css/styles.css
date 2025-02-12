@@ -144,4 +144,13 @@ button.addtocart {
     background-color: black;
     color: white;
   }
+  .dark .welcome-text {
+    color: black;
+  }
+  .dark .toggle-button {
+    background-color: #90CF44;
+  }
+  .dark .toggle-button::after {
+    color: white;
+  }
 

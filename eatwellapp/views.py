@@ -199,51 +199,58 @@ def checkout(request):
         if not cart:
             return redirect('cart')
         
-        total_amount = Decimal('0.00')
+        # Get customer's address from the form
+        customer_address = request.POST.get('address', '')
+        
+        # Update customer's address
+        customer = request.user.customer
+        customer.address = customer_address
+        customer.save()
+        
         order_items = []
-        restaurants = set()
+        restaurants = {}
 
         for food_id, details in cart.items():
             food = get_object_or_404(Food, id=food_id)
             quantity = details if isinstance(details, int) else details.get('quantity', 1)
             item_total = food.price * quantity
-            total_amount += item_total
             
-            restaurants.add(food.restaurant)
+            if food.restaurant not in restaurants:
+                restaurants[food.restaurant] = {
+                    'items': [],
+                    'total': Decimal('0.00'),
+                    'delivery_fee': Decimal('0.00')
+                }
             
-            order_items.append({
+            restaurants[food.restaurant]['items'].append({
                 'food': food,
                 'quantity': quantity,
                 'price': food.price,
-                'restaurant': food.restaurant
             })
+            restaurants[food.restaurant]['total'] += item_total
 
-        # Calculate delivery fees
-        delivery_fee = Decimal('0.00')
-        for restaurant in restaurants:
+        # Calculate delivery fees for each restaurant
+        for restaurant, data in restaurants.items():
             if restaurant.location.lower() == 'ogoja':
-                delivery_fee += Decimal('1000.00')
+                data['delivery_fee'] = Decimal('1000.00')
             elif restaurant.location.lower() == 'okuku':
-                delivery_fee += Decimal('2000.00')
+                data['delivery_fee'] = Decimal('2000.00')
             # Add more locations as needed
-
-        total_amount += delivery_fee
+            
+            data['total'] += data['delivery_fee']
 
         # Create separate orders for each restaurant
         orders = []
-        for restaurant in restaurants:
-            restaurant_items = [item for item in order_items if item['restaurant'] == restaurant]
-            restaurant_total = sum(item['price'] * item['quantity'] for item in restaurant_items)
-            
+        for restaurant, data in restaurants.items():
             order = Order.objects.create(
                 customer=request.user.customer,
                 restaurant=restaurant,
-                total_amount=restaurant_total,
-                delivery_fee=delivery_fee / len(restaurants),  # Split delivery fee equally among restaurants
+                total_amount=data['total'],
+                delivery_fee=data['delivery_fee'],
                 payment_method=request.POST.get('payment_method', 'unknown')
             )
             
-            for item in restaurant_items:
+            for item in data['items']:
                 OrderItem.objects.create(
                     order=order,
                     food=item['food'],
@@ -252,6 +259,9 @@ def checkout(request):
                 )
             
             orders.append(order)
+            
+            # Send text message for each order
+            # send_order_text(order)
 
         # Store order IDs in session for order confirmation page
         request.session['recent_order_ids'] = [order.id for order in orders]
@@ -270,11 +280,19 @@ def checkout(request):
 def order_now(request, food_id):
     food = get_object_or_404(Food, id=food_id)
     
+    # Calculate delivery fee
+    delivery_fee = Decimal('0.00')
+    if food.restaurant.location.lower() == 'ogoja':
+        delivery_fee = Decimal('1000.00')
+    elif food.restaurant.location.lower() == 'okuku':
+        delivery_fee = Decimal('2000.00')
+    
     # Create order with single item
     order = Order.objects.create(
         customer=request.user.customer,
         restaurant=food.restaurant,
-        total_amount=food.price,
+        total_amount=food.price + delivery_fee,
+        delivery_fee=delivery_fee,
         payment_method='online'  # Default to online payment
     )
     
@@ -289,7 +307,9 @@ def order_now(request, food_id):
     # Store the order ID in the session
     request.session['recent_order_ids'] = [order.id]
     
+    
     return redirect('order_confirmation')
+
 
 @login_required
 def order_confirmation(request):
