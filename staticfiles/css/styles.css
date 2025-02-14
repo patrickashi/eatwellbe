@@ -153,4 +153,16 @@ button.addtocart {
   .dark .toggle-button::after {
     color: white;
   }
+  .dark .logintext {
+    color: black;
+  }
+  .dark .loginbox {
+    background-color: black;
+  }
+  .dark .registertext {
+    color: black;
+  }
+  .dark .registerbox {
+    background-color: black;
+  }
 

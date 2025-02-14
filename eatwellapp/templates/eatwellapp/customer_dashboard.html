@@ -102,19 +102,19 @@
             </div>
 
             <!-- Food Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="flex flex-wrap md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-6 justify-center">
                 {% for food in foods %}
-                <div class="card bg-gray-100 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
-                    <img src="{{ food.image.url }}" alt="{{ food.name }}" class="w-full h-48 object-cover rounded-lg mb-4">
+                <div class="card bg-gray-100 rounded-lg shadow-md p-2 md:p-4 hover:shadow-lg transition-shadow w-40  md:w-full">
+                    <img src="{{ food.image.url }}" alt="{{ food.name }}" class="w-full h-48 object-cover rounded-sm md:rounded-lg mb-4">
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-xl font-semibold">{{ food.name }}</h3>
-                        <span class="text-sm ">{{ food.weight }}g</span>
+                        <h3 class="text-xs md:text-xl font-semibold">{{ food.name }}</h3>
+                        <span class="text-xs ">{{ food.weight }}g</span>
                     </div>
-                    <p class=" mb-2">{{ food.restaurant.name }}</p>
-                    <p class=" mb-4">{{ food.description|truncatechars:100 }}</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-lg font-bold text-green-400">₦{{ food.price }}</span>
-                        <div class="space-x-2">
+                    <p class=" mb-2 text-sm md:text-md">{{ food.restaurant.name }}</p>
+                    <p class=" mb-4 text-sm md:text-md">{{ food.description|truncatechars:100 }}</p>
+                    <div class="flex flex-col md:flex-row">
+                        <p class="text-sm text-start md:text-md font-bold text-green-400">₦{{ food.price }}</p>
+                        <div class="flex space-x-2">
                             <form method="post" action="{% url 'add_to_cart' food.id %}" class="inline">
                                 {% csrf_token %}
                                 <button type="submit" 
@@ -124,10 +124,10 @@
                                 <!-- From Uiverse.io by Damithkumara --> 
                                 <!-- <button><span></span>button</button> -->
                             </form>
-                            <a href="{% url 'order_now' food.id %}" 
+                            <!-- <a href="{% url 'order_now' food.id %}" 
                                class="inline-block text-xs bg-green-400 text-white px-2 py-2 rounded-lg hover:bg-green-500 transition-colors">
                                 Order Now
-                            </a>
+                            </a> -->
                         </div>
                     </div>
                 </div>

@@ -105,12 +105,12 @@
 
             <!-- Food Categories -->
             <div class="flex space-x-2 mb-8 overflow-x-auto pb-2">
-                <button class="cat-button px-4 py-2 rounded-full {% if not category %}bg-red-500 text-white{% else %}bg-white text-gray-700{% endif %}"
+                <button class="cat-button px-4 py-2 rounded-full text-sm md:text-md {% if not category %}bg-red-500 text-white{% else %}bg-white text-gray-700{% endif %}"
                         onclick="window.location.href='{% url 'restaurant_menu' restaurant.id %}'">
                     All
                 </button>
                 {% for cat in categories %}
-                <button class="cat-button px-2 py-2 rounded-full {% if category == cat.0 %}bg-red-500 text-white{% else %}bg-white text-gray-700{% endif %}"
+                <button class="cat-button px-2 text-sm md:text-md py-2 rounded-full {% if category == cat.0 %}bg-red-500 text-white{% else %}bg-white text-gray-700{% endif %}"
                         onclick="window.location.href='{% url 'restaurant_menu' restaurant.id %}?category={{ cat.0 }}'">
                     {{ cat.1 }}
                 </button>
