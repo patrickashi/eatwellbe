@@ -165,4 +165,10 @@ button.addtocart {
   .dark .registerbox {
     background-color: black;
   }
+  .dark .checkoutbtn {
+    background-color: #90CF44;
+  }
+  .dark .contshoppingbtn {
+    color: white;
+  }
 

@@ -132,21 +132,21 @@
                         </div>
                         <div class="mt-4 flex justify-between items-center">
                             <div>
-                                <p class="text-gray-600">Delivery Fee ({{ restaurant_count }} restaurant{% if restaurant_count > 1 %}s{% endif %}):</p>
-                                <p class="text-lg font-semibold">₦{{ delivery_fee }}</p>
+                                <p class="text-sm md:text-lg text-gray-600">Delivery Fee ({{ restaurant_count }} restaurant{% if restaurant_count > 1 %}s{% endif %}):</p>
+                                <p class="text-sm md:text-lg font-semibold">₦{{ delivery_fee }}</p>
                             </div>
                             <div>
-                                <p class="text-gray-600">Total (including delivery):</p>
-                                <p class="text-2xl font-bold text-red-500">₦{{ total_with_delivery }}</p>
+                                <p class="text-sm md:text-lg text-gray-600">Total (including delivery):</p>
+                                <p class="text-sm md:text-lg font-bold text-red-500">₦{{ total_with_delivery }}</p>
                             </div>
                         </div>
-                        <div class="mt-8 flex justify-end space-x-4">
+                        <div class="mt-8 flex justify-end space-x-2">
                             <a href="{% url 'customer_dashboard' %}" 
-                            class="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors">
+                            class="contshoppingbtn bg-gray-200 px-2 py-3 rounded-lg hover:bg-gray-300 transition-colors text-center">
                                 Continue Shopping
                             </a>
                             <a href="{% url 'checkout' %}" 
-                            class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors">
+                            class="checkoutbtn bg-[#8A3E73] text-sm text-white px-2 py-3 rounded-lg transition-colors text-center">
                                 Proceed to Checkout
                             </a>
                         </div>
